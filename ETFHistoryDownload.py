@@ -1,5 +1,7 @@
 #ETF HISTORY
-#Download historical Data and store into DB - Rabia Talib
+#Download historical Data and store into Sql DB 
+#Pivot Peformance Summary by period 
+#Author Rabia Talib and Ken Lee
 
 # Import Modules
 import pandas as pd
@@ -15,7 +17,7 @@ import sqlalchemy as sql
 from datetime import date
 import logging
 from dateutil.relativedelta import relativedelta
-%matplotlib inline
+
 
 load_dotenv()
 
@@ -29,9 +31,9 @@ etf_data_engine = sql.create_engine(eft_data_connection_string, echo=True)
 
 # Create the Alpaca API object
 alpaca = tradeapi.REST(
-    alpaca_api_key,
-    alpaca_secret_key,
-    api_version="v2")
+alpaca_api_key,
+alpaca_secret_key,
+api_version="v2")
 
 def drop_table(p_table_name):
     connection = etf_data_engine.raw_connection()
@@ -43,6 +45,7 @@ def drop_table(p_table_name):
 
 
 def fetch_hitorical_data(p_tickers, p_startDt, p_endDt):
+    etf_data_engine = sql.create_engine(eft_data_connection_string, echo=True)
     timeframe = "1D"
     start_date = pd.Timestamp(p_startDt, tz="America/New_York").isoformat()
     end_date = pd.Timestamp(p_endDt, tz="America/New_York").isoformat()
@@ -65,6 +68,63 @@ def fetch_hitorical_data(p_tickers, p_startDt, p_endDt):
         close_df.insert(0, 'symbol', symbol)
         close_df.to_sql('STOCK_HISTORY', etf_data_engine, index=True, if_exists='append')
 
+        
+def run_fetch_historical_data(p_symbols, p_date):
+
+    day_t = p_date
+    day_1 = day_t + relativedelta(days=-1)
+
+    year_1 = day_1 + relativedelta(years=-1)
+
+    # append 1 year history
+    fetch_hitorical_data(p_symbols, year_1, day_t)
+
+    # append 2 year ago history
+    year_2 = day_1 + relativedelta(years=-2)
+    year_2_d5 = year_2 + relativedelta(days=+5)
+    fetch_hitorical_data(p_symbols, year_2, year_2_d5)
+
+    # append 3 year ago history
+    year_3 = day_1 + relativedelta(years=-3)
+    year_3_d5 = year_3 + relativedelta(days=+5)
+    fetch_hitorical_data(p_symbols, year_3, year_3_d5)
+
+    
+    
+def run_fetch_historical_data(p_symbols, p_date):
+    print(p_symbols)
+    day_t = p_date
+    day_1 = day_t + relativedelta(days=-1)
+
+    year_1 = day_1 + relativedelta(years=-1)
+
+    # append 1 year history
+    fetch_hitorical_data(p_symbols, year_1, day_t)
+
+    # append 2 year ago history
+    year_2 = day_1 + relativedelta(years=-2)
+    year_2_d5 = year_2 + relativedelta(days=+5)
+    fetch_hitorical_data(p_symbols, year_2, year_2_d5)
+
+    # append 3 year ago history
+    year_3 = day_1 + relativedelta(years=-3)
+    year_3_d5 = year_3 + relativedelta(days=+5)
+    fetch_hitorical_data(p_symbols, year_3, year_3_d5)
+    
+    
+def download_EFT_holdings(p_symbol_list, p_date):
+    count = 0
+    symbol_list_99 = []
+    for index, row in p_symbol_list.iterrows():
+        symbol_list_99.append(row['name'])
+    if count > 40:
+        run_fetch_historical_data(symbol_list_99, p_date)
+        symbol_list_99 = []
+        count = 0
+    count = count + 1
+    run_fetch_historical_data(symbol_list_99, p_date)
+    
+    
 def get_market_datas_by_period(p_today):
     day_1 = p_today + relativedelta(days=-1)
     year_1 = day_1 + relativedelta(years=-1)
