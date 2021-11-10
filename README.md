@@ -7,12 +7,13 @@ Through our analysis, we we were able to create an ETF of our own, consisting of
 We use primarily use Alpaca and Pandas and numpy for the quantitative analysis, as well as sqlalchemy for database usage
 
 # Installation Guide
-For this project we need the following dependencies
+For this project we need the following dependencies:
+```
  pip install pandas
  pip install numpy
  pip install alpaca-trade-api
  pip install sqlalchemy
- 
+ ```
 # Usage
  To run this project load the jupyter notebook and run the cells.
  
