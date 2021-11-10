@@ -22,3 +22,6 @@ Ken Lee,
 Rabia Talib,
 Albert Peyton,
 Minglu Li
+
+# Liscence
+Open source project, made for educational purposes only
