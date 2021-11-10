@@ -17,7 +17,7 @@ For this project we need the following dependencies
  To run this project load the jupyter notebook and run the cells.
  
 # Contributers
-Ken Lee
-Rabia Talib
-Albert Peyton
+Ken Lee,
+Rabia Talib,
+Albert Peyton,
 Minglu Li
