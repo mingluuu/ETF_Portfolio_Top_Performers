@@ -23,5 +23,5 @@ Rabia Talib,
 Albert Peyton,
 Minglu Li
 
-# Liscence
+# Licence
 Open source project, made for educational purposes only
