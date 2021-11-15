@@ -1,7 +1,7 @@
-#ETF HISTORY
+#ETF HISTORY DOWNLOADER V.1.0 - Latest Update 2021.11.14> 
 #Download historical Data and store into Sql DB 
 #Pivot Peformance Summary by period 
-#Author Rabia Talib and Ken Lee
+#Author: Rabia Talib and Ken Lee 
 
 # Import Modules
 import pandas as pd
@@ -91,25 +91,25 @@ def run_fetch_historical_data(p_symbols, p_date):
 
     
     
-def run_fetch_historical_data(p_symbols, p_date):
-    print(p_symbols)
-    day_t = p_date
-    day_1 = day_t + relativedelta(days=-1)
-
-    year_1 = day_1 + relativedelta(years=-1)
-
-    # append 1 year history
-    fetch_hitorical_data(p_symbols, year_1, day_t)
-
-    # append 2 year ago history
-    year_2 = day_1 + relativedelta(years=-2)
-    year_2_d5 = year_2 + relativedelta(days=+5)
-    fetch_hitorical_data(p_symbols, year_2, year_2_d5)
-
-    # append 3 year ago history
-    year_3 = day_1 + relativedelta(years=-3)
-    year_3_d5 = year_3 + relativedelta(days=+5)
-    fetch_hitorical_data(p_symbols, year_3, year_3_d5)
+#def run_fetch_historical_data(p_symbols, p_date):
+#    print(p_symbols)
+#    day_t = p_date
+#    day_1 = day_t + relativedelta(days=-1)
+#
+#    year_1 = day_1 + relativedelta(years=-1)
+#
+#    # append 1 year history
+#    fetch_hitorical_data(p_symbols, year_1, day_t)
+#
+#    # append 2 year ago history
+#    year_2 = day_1 + relativedelta(years=-2)
+#    year_2_d5 = year_2 + relativedelta(days=+5)
+#    fetch_hitorical_data(p_symbols, year_2, year_2_d5)
+#
+#    # append 3 year ago history
+#    year_3 = day_1 + relativedelta(years=-3)
+#    year_3_d5 = year_3 + relativedelta(days=+5)
+#    fetch_hitorical_data(p_symbols, year_3, year_3_d5)
     
     
 def download_EFT_holdings(p_symbol_list, p_date):
@@ -117,11 +117,11 @@ def download_EFT_holdings(p_symbol_list, p_date):
     symbol_list_99 = []
     for index, row in p_symbol_list.iterrows():
         symbol_list_99.append(row['name'])
-    if count > 40:
-        run_fetch_historical_data(symbol_list_99, p_date)
-        symbol_list_99 = []
-        count = 0
-    count = count + 1
+        if count > 40:
+            run_fetch_historical_data(symbol_list_99, p_date)
+            symbol_list_99 = []
+            count = 0
+        count = count + 1
     run_fetch_historical_data(symbol_list_99, p_date)
     
     
@@ -133,7 +133,7 @@ def get_market_datas_by_period(p_today):
     day_2 = day_1 + relativedelta(days=-2)
     week_1 = day_1 + relativedelta(weeks=-1)
     month_1 = day_1 + relativedelta(months=-1)
-    month_3 = day_1 + relativedelta(months=-6)
+    month_3 = day_1 + relativedelta(months=-3)
     month_6 = day_1 + relativedelta(months=-6)
     ytd = date(day_1.year, 1, 1)
     
@@ -161,6 +161,16 @@ def get_market_datas_by_period(p_today):
     return history_dates
             
 
+def get_where_condition(p_df, p_column_name):
+    where_condition = "" 
+    for index, row in p_df.iterrows():
+        if where_condition == "":
+            where_condition = f"'{row[p_column_name]}'"
+        else:
+            where_condition = f"{where_condition}, '{row[p_column_name]}'"
+    return where_condition 
+    
+    
 def get_market_dates_list_condition(p_history_dates):
     where_dates = "" 
     for index, row in p_history_dates.iterrows():
@@ -198,3 +208,15 @@ def get_performance_by_period(p_today, p_w_px):
         price_matrix = price_matrix.drop(columns=['D7_W1', 'M1', 'M3', 'M6', 'Y0_YTD', 'Y1', 'Y2', 'Y3'])
         price_matrix = price_matrix.rename({'D0':'D0_PX'}, axis = 1)
     return price_matrix
+
+def get_hist_record_breakdown_by_period(p_today):
+    sql_query = f"""
+    SELECT distinct date, count(date) FROM STOCK_HISTORY group by date
+    """
+
+    available_data_dates = pd.read_sql_query(sql_query, eft_data_connection_string)
+    market_dates = get_market_datas_by_period(p_today)
+
+    dates_list = pd.merge(available_data_dates, market_dates, how='outer', indicator=True)
+    dates_list= dates_list.loc[dates_list._merge == 'both', ['date', 'count(date)', 'period']]
+    return dates_list
