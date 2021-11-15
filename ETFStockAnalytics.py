@@ -52,8 +52,7 @@ def get_daily_return_matrix(p_stock_hist_matrix):
     return navs_daily_returns
 
 def get_cumulative_return_matrix(p_stock_hist_matrix):
-    navs_daily_returns = p_stock_hist_matrix.pct_change().dropna()
-    navs_cumulative_returns = (1 +  navs_daily_returns).cumprod() - 1
+    navs_cumulative_returns = (1 +  p_stock_hist_matrix).cumprod() - 1
     navs_cumulative_returns = navs_cumulative_returns.dropna()
     return navs_cumulative_returns
   
